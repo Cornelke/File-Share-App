@@ -5,13 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FileIcon, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export type TransferStatus = 'pending' | 'transferring' | 'completed' | 'failed';
+export type FileTransferStatus = 'pending' | 'transferring' | 'completed' | 'failed';
 
 interface FileTransferProps {
   fileName: string;
   size: string;
   progress: number;
-  status: TransferStatus;
+  status: FileTransferStatus;
   onCancel?: () => void;
 }
 

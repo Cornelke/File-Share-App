@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 import FileDropZone from '@/components/FileDropZone';
 import QRCodeGenerator from '@/components/QRCodeGenerator';
 import ConnectionStatus from '@/components/ConnectionStatus';
-import TransferStatus, { TransferStatus } from '@/components/TransferStatus';
+import TransferStatus, { FileTransferStatus } from '@/components/TransferStatus';
 import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -16,7 +16,7 @@ interface FileTransfer {
   id: string;
   file: File;
   progress: number;
-  status: TransferStatus;
+  status: FileTransferStatus;
 }
 
 const Send = () => {
@@ -81,7 +81,7 @@ const Send = () => {
   const simulateFileTransfer = (id: string) => {
     // Mark file as transferring
     setTransfers(prev => 
-      prev.map(t => t.id === id ? { ...t, status: 'transferring' as TransferStatus } : t)
+      prev.map(t => t.id === id ? { ...t, status: 'transferring' as FileTransferStatus } : t)
     );
     
     // Simulate progress
@@ -94,7 +94,7 @@ const Send = () => {
         clearInterval(interval);
         
         setTransfers(prev => 
-          prev.map(t => t.id === id ? { ...t, progress: 100, status: 'completed' as TransferStatus } : t)
+          prev.map(t => t.id === id ? { ...t, progress: 100, status: 'completed' as FileTransferStatus } : t)
         );
         
         // Check if all transfers are completed

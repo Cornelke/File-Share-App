@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Scan, Download } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import TransferStatus, { TransferStatus } from '@/components/TransferStatus';
+import TransferStatus, { FileTransferStatus } from '@/components/TransferStatus';
 import ConnectionStatus from '@/components/ConnectionStatus';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -15,7 +15,7 @@ interface ReceivedFile {
   name: string;
   size: string;
   progress: number;
-  status: TransferStatus;
+  status: FileTransferStatus;
 }
 
 const Receive = () => {
@@ -99,7 +99,7 @@ const Receive = () => {
   const simulateFileTransfer = (id: string) => {
     // Mark file as transferring
     setReceivedFiles(prev => 
-      prev.map(f => f.id === id ? { ...f, status: 'transferring' as TransferStatus } : f)
+      prev.map(f => f.id === id ? { ...f, status: 'transferring' as FileTransferStatus } : f)
     );
     
     // Simulate progress
@@ -112,7 +112,7 @@ const Receive = () => {
         clearInterval(interval);
         
         setReceivedFiles(prev => 
-          prev.map(f => f.id === id ? { ...f, progress: 100, status: 'completed' as TransferStatus } : f)
+          prev.map(f => f.id === id ? { ...f, progress: 100, status: 'completed' as FileTransferStatus } : f)
         );
         
         // Check if all transfers are completed
