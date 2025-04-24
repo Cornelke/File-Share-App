@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TransferStatus, { FileTransferStatus } from '@/components/TransferStatus';
 import ConnectionStatus from '@/components/ConnectionStatus';
+import QRCodeScanner from '@/components/QRCodeScanner';
 import { useToast } from '@/components/ui/use-toast';
 
 interface ReceivedFile {
@@ -35,6 +35,20 @@ const Receive = () => {
     { name: 'Product Demo.mp4', size: '128 MB' },
   ];
   
+  const handleQRCodeScanned = (result: string) => {
+    setIsScanning(false);
+    setConnectionUrl(result);
+    connect();
+  };
+  
+  const handleScanError = (error: Error) => {
+    toast({
+      title: "Scanning Error",
+      description: error.message,
+      variant: "destructive"
+    });
+  };
+
   const simulateScan = () => {
     setIsScanning(true);
     
@@ -154,31 +168,37 @@ const Receive = () => {
                     
                     {connectionStatus === 'disconnected' && (
                       <>
-                        <div className="flex space-x-2 pt-4">
-                          <Input 
-                            placeholder="Enter connection URL"
-                            value={connectionUrl}
-                            onChange={(e) => setConnectionUrl(e.target.value)}
+                        {isScanning ? (
+                          <QRCodeScanner 
+                            onScan={handleQRCodeScanned}
+                            onError={handleScanError}
                           />
-                          <Button variant="outline" className="shrink-0 px-3" onClick={simulateScan}>
-                            <Scan size={18} />
-                          </Button>
-                        </div>
-                        
-                        <Button 
-                          className="w-full gap-2" 
-                          onClick={connect}
-                          disabled={isScanning}
-                        >
-                          {isScanning ? (
-                            <>Scanning...</>
-                          ) : (
-                            <>
+                        ) : (
+                          <>
+                            <div className="flex space-x-2 pt-4">
+                              <Input 
+                                placeholder="Enter connection URL"
+                                value={connectionUrl}
+                                onChange={(e) => setConnectionUrl(e.target.value)}
+                              />
+                              <Button 
+                                variant="outline" 
+                                className="shrink-0 px-3" 
+                                onClick={() => setIsScanning(true)}
+                              >
+                                <Scan size={18} />
+                              </Button>
+                            </div>
+                            
+                            <Button 
+                              className="w-full gap-2" 
+                              onClick={connect}
+                            >
                               <Download size={18} />
                               Connect & Receive
-                            </>
-                          )}
-                        </Button>
+                            </Button>
+                          </>
+                        )}
                       </>
                     )}
                   </div>
