@@ -2,8 +2,9 @@
 import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileIcon, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileIcon, X, CheckCircle2, AlertCircle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export type FileTransferStatus = 'pending' | 'transferring' | 'completed' | 'failed';
 
@@ -13,6 +14,8 @@ interface FileTransferProps {
   progress: number;
   status: FileTransferStatus;
   onCancel?: () => void;
+  transferSpeed?: string;
+  isHighSpeed?: boolean;
 }
 
 const TransferStatus: React.FC<FileTransferProps> = ({
@@ -20,7 +23,9 @@ const TransferStatus: React.FC<FileTransferProps> = ({
   size,
   progress,
   status,
-  onCancel
+  onCancel,
+  transferSpeed,
+  isHighSpeed = false
 }) => {
   const getStatusIcon = () => {
     switch (status) {
@@ -62,9 +67,23 @@ const TransferStatus: React.FC<FileTransferProps> = ({
             </span>
             
             <div className="truncate">
-              <div className="text-sm font-medium truncate">{fileName}</div>
+              <div className="text-sm font-medium truncate flex items-center gap-2">
+                {fileName}
+                {isHighSpeed && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Zap className="h-3 w-3" />
+                    High Speed
+                  </Badge>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground flex items-center gap-2">
                 <span>{size}</span>
+                {transferSpeed && (
+                  <>
+                    <span>•</span>
+                    <span>{transferSpeed}/s</span>
+                  </>
+                )}
                 <span>•</span>
                 <span className={
                   status === 'completed' ? 'text-green-500' : 
@@ -102,3 +121,4 @@ const TransferStatus: React.FC<FileTransferProps> = ({
 };
 
 export default TransferStatus;
+

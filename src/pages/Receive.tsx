@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import QRCodeScanner from '@/components/QRCodeScanner';
 import { useToast } from '@/components/ui/use-toast';
 import ConnectionCodeInput from '@/components/ConnectionCodeInput';
 import { isValidConnectionCode } from '@/utils/connectionCodes';
+import { TransferCapabilities, checkDeviceCapabilities } from '@/utils/transferSpeed';
 
 interface ReceivedFile {
   id: string;
@@ -18,6 +19,7 @@ interface ReceivedFile {
   size: string;
   progress: number;
   status: FileTransferStatus;
+  transferSpeed?: string;
 }
 
 const Receive = () => {
@@ -28,6 +30,8 @@ const Receive = () => {
   >('disconnected');
   const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
   const [isManualInput, setIsManualInput] = useState(false);
+  const [deviceCapabilities, setDeviceCapabilities] = useState<TransferCapabilities | null>(null);
+  const [isHighSpeedEnabled, setIsHighSpeedEnabled] = useState(false);
   const { toast } = useToast();
   
   const mockFiles = [
@@ -104,35 +108,58 @@ const Receive = () => {
     }, 1500);
   };
   
+  const getTransferSpeed = (fileSize: number): string => {
+    const baseSpeed = 1024 * 1024; // 1MB/s base speed
+    const speed = isHighSpeedEnabled ? baseSpeed * 5 : baseSpeed;
+    const speedMB = speed / (1024 * 1024);
+    return `${speedMB} MB`;
+  };
+
   const simulateFileTransfers = (files: ReceivedFile[]) => {
-    files.forEach((file, index) => {
-      // Stagger the start of each transfer
-      setTimeout(() => {
-        simulateFileTransfer(file.id);
-      }, index * 800);
-    });
+    const chunkSize = deviceCapabilities?.maxChunkSize || 1024 * 1024;
+    const concurrent = deviceCapabilities?.concurrentTransfers || 1;
+    
+    // Process files in batches based on concurrent transfer limit
+    for (let i = 0; i < files.length; i += concurrent) {
+      const batch = files.slice(i, i + concurrent);
+      batch.forEach((file, index) => {
+        setTimeout(() => {
+          simulateFileTransfer(file.id);
+        }, index * (isHighSpeedEnabled ? 400 : 800));
+      });
+    }
   };
   
   const simulateFileTransfer = (id: string) => {
-    // Mark file as transferring
+    const fileSize = Math.random() * 1024 * 1024 * 100; // Random file size up to 100MB
+    const transferSpeed = getTransferSpeed(fileSize);
+
     setReceivedFiles(prev => 
-      prev.map(f => f.id === id ? { ...f, status: 'transferring' as FileTransferStatus } : f)
+      prev.map(f => f.id === id ? { 
+        ...f, 
+        status: 'transferring' as FileTransferStatus,
+        transferSpeed 
+      } : f)
     );
-    
-    // Simulate progress
+
     let progress = 0;
+    const increment = isHighSpeedEnabled ? 10 : 5;
     const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 8) + 1;
+      progress += increment;
       
       if (progress >= 100) {
         progress = 100;
         clearInterval(interval);
         
         setReceivedFiles(prev => 
-          prev.map(f => f.id === id ? { ...f, progress: 100, status: 'completed' as FileTransferStatus } : f)
+          prev.map(f => f.id === id ? { 
+            ...f, 
+            progress: 100, 
+            status: 'completed' as FileTransferStatus,
+            transferSpeed: undefined 
+          } : f)
         );
         
-        // Check if all transfers are completed
         const allCompleted = receivedFiles.every(f => f.id === id || f.status === 'completed');
         if (allCompleted) {
           setTimeout(() => {
@@ -144,12 +171,12 @@ const Receive = () => {
         }
       } else {
         setReceivedFiles(prev => 
-          prev.map(f => f.id === id ? { ...f, progress } : f)
+          prev.map(f => f.id === id ? { ...f, progress, transferSpeed } : f)
         );
       }
-    }, 350);
+    }, isHighSpeedEnabled ? 150 : 350);
   };
-  
+
   const handleCodeComplete = (code: string) => {
     if (isValidConnectionCode(code)) {
       setConnectionUrl(`http://localhost:8080/connect?code=${code}`);
@@ -162,6 +189,12 @@ const Receive = () => {
       });
     }
   };
+
+  useEffect(() => {
+    const capabilities = checkDeviceCapabilities();
+    setDeviceCapabilities(capabilities);
+    setIsHighSpeedEnabled(capabilities.highSpeed);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -246,6 +279,8 @@ const Receive = () => {
                           size={file.size}
                           progress={file.progress}
                           status={file.status}
+                          transferSpeed={file.transferSpeed}
+                          isHighSpeed={isHighSpeedEnabled}
                         />
                       ))}
                     </div>
