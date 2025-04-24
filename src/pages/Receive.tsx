@@ -9,6 +9,8 @@ import TransferStatus, { FileTransferStatus } from '@/components/TransferStatus'
 import ConnectionStatus from '@/components/ConnectionStatus';
 import QRCodeScanner from '@/components/QRCodeScanner';
 import { useToast } from '@/components/ui/use-toast';
+import ConnectionCodeInput from '@/components/ConnectionCodeInput';
+import { isValidConnectionCode } from '@/utils/connectionCodes';
 
 interface ReceivedFile {
   id: string;
@@ -25,6 +27,7 @@ const Receive = () => {
     'disconnected' | 'connecting' | 'connected' | 'error'
   >('disconnected');
   const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
+  const [isManualInput, setIsManualInput] = useState(false);
   const { toast } = useToast();
   
   const mockFiles = [
@@ -147,6 +150,19 @@ const Receive = () => {
     }, 350);
   };
   
+  const handleCodeComplete = (code: string) => {
+    if (isValidConnectionCode(code)) {
+      setConnectionUrl(`http://localhost:8080/connect?code=${code}`);
+      connect();
+    } else {
+      toast({
+        title: "Invalid Code",
+        description: "Please enter a valid 8-digit connection code",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -160,7 +176,7 @@ const Receive = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Connect</CardTitle>
-                  <CardDescription>Enter connection code or scan QR code</CardDescription>
+                  <CardDescription>Enter code or scan QR code</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -173,30 +189,38 @@ const Receive = () => {
                             onScan={handleQRCodeScanned}
                             onError={handleScanError}
                           />
+                        ) : isManualInput ? (
+                          <>
+                            <ConnectionCodeInput 
+                              onComplete={handleCodeComplete}
+                              loading={connectionStatus === 'connecting'}
+                            />
+                            <Button 
+                              variant="outline"
+                              className="w-full mt-2"
+                              onClick={() => setIsManualInput(false)}
+                            >
+                              Scan QR Instead
+                            </Button>
+                          </>
                         ) : (
                           <>
-                            <div className="flex space-x-2 pt-4">
-                              <Input 
-                                placeholder="Enter connection URL"
-                                value={connectionUrl}
-                                onChange={(e) => setConnectionUrl(e.target.value)}
-                              />
+                            <div className="flex flex-col space-y-2">
                               <Button 
-                                variant="outline" 
-                                className="shrink-0 px-3" 
+                                variant="default"
+                                className="w-full"
+                                onClick={() => setIsManualInput(true)}
+                              >
+                                Enter Code Manually
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                className="w-full"
                                 onClick={() => setIsScanning(true)}
                               >
-                                <Scan size={18} />
+                                Scan QR Code
                               </Button>
                             </div>
-                            
-                            <Button 
-                              className="w-full gap-2" 
-                              onClick={connect}
-                            >
-                              <Download size={18} />
-                              Connect & Receive
-                            </Button>
                           </>
                         )}
                       </>

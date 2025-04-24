@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
@@ -11,6 +10,7 @@ import ConnectionStatus from '@/components/ConnectionStatus';
 import TransferStatus, { FileTransferStatus } from '@/components/TransferStatus';
 import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { generateConnectionCode } from '@/utils/connectionCodes';
 
 interface FileTransfer {
   id: string;
@@ -26,11 +26,15 @@ const Send = () => {
     'disconnected' | 'connecting' | 'connected' | 'error'
   >('disconnected');
   const [connectedDevices, setConnectedDevices] = useState(0);
+  const [connectionCode, setConnectionCode] = useState('');
   const { toast } = useToast();
   
-  // Mock connection URL - in a real app this would be generated dynamically
   const connectionUrl = `http://localhost:8080/connect?id=${Math.random().toString(36).substring(2, 8)}`;
   
+  useEffect(() => {
+    setConnectionCode(generateConnectionCode());
+  }, []);
+
   const handleFilesSelected = (selectedFiles: File[]) => {
     setFiles(selectedFiles);
   };
@@ -45,15 +49,12 @@ const Send = () => {
       return;
     }
     
-    // Simulate connecting
     setConnectionStatus('connecting');
     
-    // Simulate connection established after 1.5 seconds
     setTimeout(() => {
       setConnectionStatus('connected');
       setConnectedDevices(1);
       
-      // Create transfer objects from files
       const newTransfers: FileTransfer[] = files.map(file => ({
         id: Math.random().toString(36).substring(2, 10),
         file,
@@ -63,9 +64,7 @@ const Send = () => {
       
       setTransfers(newTransfers);
       
-      // Simulate transfer progress for each file
       newTransfers.forEach((transfer, index) => {
-        // Start with a slight delay for each file
         setTimeout(() => {
           simulateFileTransfer(transfer.id);
         }, index * 800);
@@ -79,12 +78,10 @@ const Send = () => {
   };
   
   const simulateFileTransfer = (id: string) => {
-    // Mark file as transferring
     setTransfers(prev => 
       prev.map(t => t.id === id ? { ...t, status: 'transferring' as FileTransferStatus } : t)
     );
     
-    // Simulate progress
     let progress = 0;
     const interval = setInterval(() => {
       progress += Math.floor(Math.random() * 10) + 1;
@@ -97,7 +94,6 @@ const Send = () => {
           prev.map(t => t.id === id ? { ...t, progress: 100, status: 'completed' as FileTransferStatus } : t)
         );
         
-        // Check if all transfers are completed
         setTimeout(() => {
           const allCompleted = transfers.every(t => t.id === id || t.status === 'completed');
           if (allCompleted) {
@@ -186,7 +182,7 @@ const Send = () => {
                 <CardHeader>
                   <CardTitle>Connection</CardTitle>
                   <CardDescription>
-                    Share this code with the device that will receive files
+                    Share this code or scan QR with the receiving device
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center">
@@ -195,8 +191,22 @@ const Send = () => {
                     connectedDevices={connectedDevices} 
                   />
                   
-                  <div className="my-4">
-                    <QRCodeGenerator value={connectionUrl} />
+                  <div className="my-4 w-full space-y-4">
+                    <div className="text-center p-4 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-2">Connection Code</p>
+                      <p className="text-2xl font-mono font-bold tracking-wider">{connectionCode}</p>
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">or scan QR</span>
+                      </div>
+                    </div>
+                    
+                    <QRCodeGenerator value={`${connectionUrl}?code=${connectionCode}`} />
                   </div>
                   
                   {connectionStatus === 'disconnected' && (
