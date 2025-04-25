@@ -103,11 +103,11 @@ export function useFileTransfer(mode: 'send' | 'receive') {
       console.error("ICE candidate error:", event);
     };
     
-    // Log any general errors
-    pc.onerror = (error) => {
+    // Log general errors (removing the direct onerror property assignment)
+    pc.addEventListener('error', (error) => {
       console.error("PeerConnection error:", error);
       setConnectionStatus('error');
-    };
+    });
     
     return pc;
   }, [mode, toast, isHighSpeedEnabled]);
