@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
         <div className="flex items-center gap-2">
           <Logo size="sm" />
           <span className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} WiFi File Flow
+            © {new Date().getFullYear()} FileShare
           </span>
         </div>
         

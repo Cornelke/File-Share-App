@@ -35,7 +35,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true }) => {
       
       {showText && (
         <span className={`font-bold ${textSize[size]} bg-gradient-to-r from-brand-purple to-brand-blue text-transparent bg-clip-text`}>
-          WiFi File Flow
+          FileShare
         </span>
       )}
     </div>

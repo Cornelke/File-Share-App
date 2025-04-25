@@ -1,7 +1,7 @@
 
 {
-  "name": "WiFi File Flow",
-  "short_name": "WiFi Flow",
+  "name": "FileShare",
+  "short_name": "FileShare",
   "description": "Share files between devices over WiFi or hotspot without internet",
   "start_url": "/",
   "display": "standalone",

@@ -1,6 +1,6 @@
 
-// WiFi File Flow Service Worker for offline functionality
-const CACHE_NAME = 'wifi-file-flow-v1';
+// FileShare Service Worker for offline functionality
+const CACHE_NAME = 'fileshare-v1';
 const urlsToCache = [
   '/',
   '/index.html',

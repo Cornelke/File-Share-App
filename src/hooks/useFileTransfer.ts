@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useConnectionState } from './useConnectionState';
 import { useTransferManager } from './useTransferManager';
@@ -44,21 +43,16 @@ export function useFileTransfer(mode: 'send' | 'receive') {
         switch (message.type) {
           case 'file-info':
             if (mode === 'receive') {
-              // Create a minimal File-like object with required properties
-              const fileInfo = {
-                name: message.fileName,
-                size: message.fileSize,
-                type: message.fileType || 'application/octet-stream',
-                lastModified: Date.now()
-              };
+              // Create an empty ArrayBuffer that we'll fill with chunks later
+              const emptyContent = new Uint8Array(0);
               
-              // Convert to actual File object to satisfy type requirements
+              // Create a proper File object with all required properties
               const file = new File(
-                [new ArrayBuffer(0)], // Empty content initially
-                fileInfo.name,
+                [emptyContent], 
+                message.fileName || 'unknown-file',
                 {
-                  type: fileInfo.type,
-                  lastModified: fileInfo.lastModified
+                  type: message.fileType || 'application/octet-stream',
+                  lastModified: Date.now()
                 }
               );
               
