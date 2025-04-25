@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
@@ -7,132 +8,23 @@ import Footer from '@/components/Footer';
 import FileDropZone from '@/components/FileDropZone';
 import QRCodeGenerator from '@/components/QRCodeGenerator';
 import ConnectionStatus from '@/components/ConnectionStatus';
-import TransferStatus, { FileTransferStatus } from '@/components/TransferStatus';
-import { useToast } from '@/components/ui/use-toast';
+import TransferStatus from '@/components/TransferStatus';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { generateConnectionCode } from '@/utils/connectionCodes';
-
-interface FileTransfer {
-  id: string;
-  file: File;
-  progress: number;
-  status: FileTransferStatus;
-}
+import { useFileTransfer } from '@/hooks/useFileTransfer';
 
 const Send = () => {
-  const [files, setFiles] = useState<File[]>([]);
-  const [transfers, setTransfers] = useState<FileTransfer[]>([]);
-  const [connectionStatus, setConnectionStatus] = useState<
-    'disconnected' | 'connecting' | 'connected' | 'error'
-  >('disconnected');
-  const [connectedDevices, setConnectedDevices] = useState(0);
-  const [connectionCode, setConnectionCode] = useState('');
-  const { toast } = useToast();
+  const { 
+    files,
+    transfers,
+    connectionStatus,
+    connectedDevices,
+    connectionId,
+    handleFilesSelected,
+    startConnection,
+    cancelTransfer
+  } = useFileTransfer('send');
   
-  const connectionUrl = `http://localhost:8080/connect?id=${Math.random().toString(36).substring(2, 8)}`;
-  
-  useEffect(() => {
-    setConnectionCode(generateConnectionCode());
-  }, []);
-
-  const handleFilesSelected = (selectedFiles: File[]) => {
-    setFiles(selectedFiles);
-  };
-  
-  const startSharing = () => {
-    if (files.length === 0) {
-      toast({
-        title: "No files selected",
-        description: "Please select at least one file to share.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setConnectionStatus('connecting');
-    
-    setTimeout(() => {
-      setConnectionStatus('connected');
-      setConnectedDevices(1);
-      
-      const newTransfers: FileTransfer[] = files.map(file => ({
-        id: Math.random().toString(36).substring(2, 10),
-        file,
-        progress: 0,
-        status: 'pending'
-      }));
-      
-      setTransfers(newTransfers);
-      
-      newTransfers.forEach((transfer, index) => {
-        setTimeout(() => {
-          simulateFileTransfer(transfer.id);
-        }, index * 800);
-      });
-      
-      toast({
-        title: "Connection established!",
-        description: "Ready to transfer files."
-      });
-    }, 1500);
-  };
-  
-  const simulateFileTransfer = (id: string) => {
-    setTransfers(prev => 
-      prev.map(t => t.id === id ? { ...t, status: 'transferring' as FileTransferStatus } : t)
-    );
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.floor(Math.random() * 10) + 1;
-      
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        
-        setTransfers(prev => 
-          prev.map(t => t.id === id ? { ...t, progress: 100, status: 'completed' as FileTransferStatus } : t)
-        );
-        
-        setTimeout(() => {
-          const allCompleted = transfers.every(t => t.id === id || t.status === 'completed');
-          if (allCompleted) {
-            toast({
-              title: "All files transferred!",
-              description: "Files have been successfully transferred."
-            });
-          }
-        }, 500);
-      } else {
-        setTransfers(prev => 
-          prev.map(t => t.id === id ? { ...t, progress } : t)
-        );
-      }
-    }, 300);
-  };
-  
-  const cancelTransfer = (id: string) => {
-    setTransfers(prev => 
-      prev.map(t => t.id === id ? { ...t, status: 'failed', progress: 0 } : t)
-    );
-    
-    toast({
-      title: "Transfer cancelled",
-      description: "File transfer has been cancelled."
-    });
-  };
-  
-  const getFileSize = (size: number) => {
-    if (size < 1024) {
-      return `${size} B`;
-    } else if (size < 1048576) {
-      return `${(size / 1024).toFixed(1)} KB`;
-    } else if (size < 1073741824) {
-      return `${(size / 1048576).toFixed(1)} MB`;
-    } else {
-      return `${(size / 1073741824).toFixed(1)} GB`;
-    }
-  };
+  const connectionUrl = `https://${window.location.host}/connect?code=${connectionId}`;
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -164,8 +56,8 @@ const Send = () => {
                     {transfers.map((transfer) => (
                       <TransferStatus 
                         key={transfer.id}
-                        fileName={transfer.file.name}
-                        size={getFileSize(transfer.file.size)}
+                        fileName={transfer.name}
+                        size={transfer.size}
                         progress={transfer.progress}
                         status={transfer.status}
                         onCancel={transfer.status !== 'completed' ? 
@@ -194,7 +86,7 @@ const Send = () => {
                   <div className="my-4 w-full space-y-4">
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <p className="text-sm text-muted-foreground mb-2">Connection Code</p>
-                      <p className="text-2xl font-mono font-bold tracking-wider">{connectionCode}</p>
+                      <p className="text-2xl font-mono font-bold tracking-wider">{connectionId}</p>
                     </div>
                     
                     <div className="relative">
@@ -206,13 +98,13 @@ const Send = () => {
                       </div>
                     </div>
                     
-                    <QRCodeGenerator value={`${connectionUrl}?code=${connectionCode}`} />
+                    <QRCodeGenerator value={`${connectionUrl}?code=${connectionId}`} />
                   </div>
                   
                   {connectionStatus === 'disconnected' && (
                     <Button 
                       className="w-full gap-2"
-                      onClick={startSharing}
+                      onClick={startConnection}
                       disabled={files.length === 0}
                     >
                       <Share2 size={18} />
