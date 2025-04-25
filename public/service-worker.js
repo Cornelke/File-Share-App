@@ -8,6 +8,9 @@ const urlsToCache = [
   '/icon-192.png',
   '/icon-512.png',
   '/favicon.ico',
+  '/send',
+  '/receive',
+  '/connect'
 ];
 
 // Cache essential assets during installation
@@ -43,6 +46,22 @@ self.addEventListener('activate', event => {
 
 // Network-first strategy with fallback to cache
 self.addEventListener('fetch', event => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
+  // Handle SPA navigation
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match('/');
+        })
+    );
+    return;
+  }
+  
   event.respondWith(
     // Try network first
     fetch(event.request)
@@ -93,3 +112,23 @@ self.addEventListener('message', event => {
   }
 });
 
+// Handle offline sync
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-files') {
+    event.waitUntil(syncFiles());
+  }
+});
+
+// Function to sync files when online
+async function syncFiles() {
+  // Implementation depends on your app's needs
+  console.log('Syncing files with server when back online');
+  // Example: Read from IndexedDB and sync with server
+}
+
+// Notify clients when app is ready for offline use
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});

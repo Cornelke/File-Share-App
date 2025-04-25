@@ -44,11 +44,25 @@ export function useFileTransfer(mode: 'send' | 'receive') {
         switch (message.type) {
           case 'file-info':
             if (mode === 'receive') {
-              const transferId = addTransfer({
+              // Create a minimal File-like object with required properties
+              const fileInfo = {
                 name: message.fileName,
                 size: message.fileSize,
-                type: 'application/octet-stream'
-              } as File);
+                type: message.fileType || 'application/octet-stream',
+                lastModified: Date.now()
+              };
+              
+              // Convert to actual File object to satisfy type requirements
+              const file = new File(
+                [new ArrayBuffer(0)], // Empty content initially
+                fileInfo.name,
+                {
+                  type: fileInfo.type,
+                  lastModified: fileInfo.lastModified
+                }
+              );
+              
+              const transferId = addTransfer(file);
               
               dataChannel.send(JSON.stringify({
                 type: 'ready',
