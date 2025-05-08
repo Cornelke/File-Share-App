@@ -76,10 +76,21 @@ export function useFileTransfer(mode: 'send' | 'receive') {
                 // When file transfer is complete, retrieve the complete file from storage
                 try {
                   const file = await retrieveFileLocally(fileId);
-                  if (file) {
+                  if (file && file instanceof File) {
                     updateTransfer(fileId, { 
                       status: 'completed',
-                      file // This is a proper File object now
+                      file: file
+                    });
+                  } else {
+                    // Handle the case when file is not a proper File object
+                    const fallbackFile = new File(
+                      [new Uint8Array(0)],
+                      'unknown-file',
+                      { type: 'application/octet-stream' }
+                    );
+                    updateTransfer(fileId, { 
+                      status: 'completed',
+                      file: fallbackFile
                     });
                   }
                 } catch (error) {
