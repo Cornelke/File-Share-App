@@ -1,14 +1,31 @@
-
 {
-  "name": "FileShare",
+  "name": "FileShare - Share Files Over WiFi",
   "short_name": "FileShare",
-  "description": "Share files between devices over WiFi or hotspot without internet",
+  "description": "Share files between devices over WiFi or hotspot without internet. Fast, secure, and easy-to-use file sharing solution.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#8B5CF6",
   "orientation": "any",
   "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
@@ -22,18 +39,20 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["utilities", "productivity"],
+  "categories": ["utilities", "productivity", "file sharing"],
   "prefer_related_applications": false,
   "related_applications": [],
   "shortcuts": [
     {
       "name": "Send Files",
       "url": "/send",
+      "description": "Send files to other devices",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Receive Files",
       "url": "/receive",
+      "description": "Receive files from other devices",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ],
@@ -50,5 +69,14 @@
       ]
     }
   },
-  "offline_enabled": true
+  "offline_enabled": true,
+  "screenshots": [
+    {
+      "src": "https://fileshare.vercel.app/opengraph-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "FileShare App Screenshot"
+    }
+  ]
 }
