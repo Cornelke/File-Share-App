@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+# FileShare
 
-## Project info
+A fast, secure, and easy-to-use web app for sharing files between devices over WiFi or hotspot, without the need for internet access.
 
-**URL**: https://lovable.dev/projects/ceca0976-2ebe-4847-8a89-a4cf2f649306
+---
 
-## How can I edit this code?
+## Features
+- **Peer-to-peer file sharing**: Send and receive files directly between devices on the same network.
+- **No internet required**: Works over local WiFi or hotspot.
+- **Progressive Web App (PWA)**: Installable, offline support, and mobile-friendly.
+- **QR code and code-based connection**: Easily connect devices using QR codes or short connection codes.
+- **Modern UI**: Built with React, shadcn-ui, and Tailwind CSS for a clean and responsive experience.
 
-There are several ways of editing your application.
+## Author
+- **Trancent Tech** ((https://trancent.vercel.app))
+- Project maintained by: (https://twitter.com/trancenttech)
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ceca0976-2ebe-4847-8a89-a4cf2f649306) and start prompting.
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation & Local Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Visit [http://localhost:8080](http://localhost:8080) in your browser.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Building for Production
 
-**Use GitHub Codespaces**
+```sh
+npm run build
+```
+The production-ready files will be in the `dist/` directory.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Preview Production Build Locally
+```sh
+npm run preview
+```
 
-## What technologies are used for this project?
+## Deployment (Vercel)
+1. Push your code to a GitHub/GitLab/Bitbucket repository.
+2. Go to [Vercel](https://vercel.com/) and import your repository.
+3. Vercel will auto-detect the Vite project and build it.
+4. Your app will be live at `https://fileshare.vercel.app` (or your custom domain).
 
-This project is built with:
+### PWA & SEO
+- The app is a PWA with offline support and installability.
+- SEO optimized with meta tags, manifest, sitemap, and robots.txt.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Project Structure
+- `src/` - Main application source code
+- `public/` - Static files (icons, manifest, service worker, etc.)
+- `vercel.json` - Vercel configuration
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/ceca0976-2ebe-4847-8a89-a4cf2f649306) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**Happy sharing!**
