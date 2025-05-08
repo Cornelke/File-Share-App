@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useConnectionState } from './useConnectionState';
 import { useTransferManager } from './useTransferManager';
@@ -72,11 +73,28 @@ export function useFileTransfer(mode: 'send' | 'receive') {
               updateTransfer(fileId, { progress, status: 'transferring' });
               
               if (progress === 100) {
-                const file = await retrieveFileLocally(fileId);
-                updateTransfer(fileId, { 
-                  status: 'completed',
-                  file
-                });
+                // When file transfer is complete, retrieve the complete file from storage
+                try {
+                  const file = await retrieveFileLocally(fileId);
+                  if (file) {
+                    updateTransfer(fileId, { 
+                      status: 'completed',
+                      file // This is a proper File object now
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error retrieving complete file:', error);
+                  // Create a fallback empty file if retrieval fails
+                  const fallbackFile = new File(
+                    [new Uint8Array(0)],
+                    'file-transfer-failed',
+                    { type: 'application/octet-stream' }
+                  );
+                  updateTransfer(fileId, { 
+                    status: 'failed',
+                    file: fallbackFile
+                  });
+                }
               }
               
               dataChannel.send(JSON.stringify({
